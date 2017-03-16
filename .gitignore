@@ -1,0 +1,7 @@
+*.xml
+*.fasta
+*.swp
+/db
+/output
+/queries
+/genomes
