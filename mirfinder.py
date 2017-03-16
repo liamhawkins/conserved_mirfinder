@@ -52,8 +52,8 @@ for blast_record in blast_records:
         for mature_alignment in mature_record.alignments:
             for mature_hsp in mature_alignment.hsps:
                 #if mature_hsp.align_length > (mature_alignment.length - 3):
-                print(mature_record.query_id)
-                print(mature_alignment.title)
+                print(mature_record.query)
+                print(mature_alignment.hit_def)
                 print(mature_hsp.query)
                 print(mature_hsp.match)
                 print(mature_hsp.sbjct)
