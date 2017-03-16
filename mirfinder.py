@@ -41,18 +41,19 @@ for blast_record in blast_records:
                 # print(hsp.sbjct)
                 # print('xen hp for', blast_record.query[0:-10] + ':', hsp.sbjct.replace('-', ''))
                 seq_list.append(SeqRecord(Seq(hsp.sbjct.replace('-','')), id=alignment.title))
-                phairpins_output_file = './output/potential-hairpins/' + blast_record.query + '-potential-hairpins.fasta'
-                SeqIO.write(seq_list, phairpins_output_file, 'fasta')
-                blast_mature_vs_potential_stemloops(phairpins_output_file, MATURE_QUERY_FILE, 'mature.xml')
+    phairpins_output_file = './output/potential-hairpins/' + blast_record.query + '-potential-hairpins.fasta'
+    SeqIO.write(seq_list, phairpins_output_file, 'fasta')
+    blast_mature_vs_potential_stemloops(phairpins_output_file, MATURE_QUERY_FILE, STEMLOOP_OUT_FILE)
 
-                mature_handle = open('mature.xml')
-                mature_records = NCBIXML.parse(mature_handle)
+    mature_handle = open(STEMLOOP_OUT_FILE)
+    mature_records = NCBIXML.parse(mature_handle)
 
-                for mature_record in mature_records:
-                    for mature_alignment in mature_record.alignments:
-                        for mature_hsp in mature_alignment.hsps:
-                            if mature_hsp.align_length > (mature_alignment.length -3 ):
-                                print(mature_alignment.title)
-                                print(mature_hsp.query)
-                                print(mature_hsp.match)
-                                print(mature_hsp.sbjct)
+    for mature_record in mature_records:
+        for mature_alignment in mature_record.alignments:
+            for mature_hsp in mature_alignment.hsps:
+                #if mature_hsp.align_length > (mature_alignment.length - 3):
+                print(mature_record.query_id)
+                print(mature_alignment.title)
+                print(mature_hsp.query)
+                print(mature_hsp.match)
+                print(mature_hsp.sbjct)
