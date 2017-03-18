@@ -29,6 +29,7 @@ class MirFinder():
         self.genome_database = config.genome_db
         self.stem_file = config.stemloop_query_file
         self.mature_file = config.mature_query_file
+        self.csv_filename = config.csv_filename
         self.species_abreviation = config.species_abreviation
         self.e_value_threshold = config.e_value_threshold
         self.columns = ['Reference_miR', 'Reference_seq', 'Potential_miR', 'Potential_seq']
@@ -158,8 +159,7 @@ class MirFinder():
         self.potential_matures_df = self.potential_matures_df.append(row, ignore_index=True)
 
     def write_potential_matures(self):
-        # TODO: write potential_matures_df to file
-        pass
+        self.potential_matures_df.to_csv(self.csv_filename, sep=',', index=False)
 
 
 if __name__ == '__main__':
