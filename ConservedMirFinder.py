@@ -19,6 +19,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+import pandas as pd
 import config
 
 
@@ -30,6 +31,8 @@ class MirFinder():
         self.mature_file = config.mature_query_file
         self.species_abreviation = config.species_abreviation
         self.e_value_threshold = config.e_value_threshold
+        self.columns = ['Reference_miR', 'Reference_seq', 'Potential_miR', 'Potential_seq']
+        self.potential_matures_df = pd.DataFrame(columns=self.columns)
 
     def read_reference_stems(self, stem_file=None):
         if stem_file is None:
@@ -129,7 +132,7 @@ class MirFinder():
                                             query=pot_stem_record_file,
                                             subject=mature_record_file,
                                             out=multi_blast_output_file,
-                                            outfmt=5, word_size=10)
+                                            outfmt=5, word_size=16)
 
         multi_blast()
         results_handle = open(multi_blast_output_file)
@@ -145,11 +148,16 @@ class MirFinder():
                     potential_matures.append(record)
         return potential_matures
 
-    def add_to_dataframe(self, potential_matures, corr_ref_mature):
-        # TODO: Check if potential_mature is already in df, if not add to df
-        pass
+    def add_to_dataframe(self, potential_mature, corr_ref_mature):
+        row = pd.DataFrame([[corr_ref_mature.id,
+                             str(corr_ref_mature.seq),
+                             potential_mature.id,
+                             str(potential_mature.seq).replace('T', 'U')]],
+                             columns=self.columns)
 
-    def write_potential_matures(self, potential_matures_df):
+        self.potential_matures_df = self.potential_matures_df.append(row, ignore_index=True)
+
+    def write_potential_matures(self):
         # TODO: write potential_matures_df to file
         pass
 
@@ -165,8 +173,8 @@ if __name__ == '__main__':
             for pot_stem in potential_stems:
                 for corr_ref_mature in corr_reference_matures:
                     potential_matures = mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem)
-                    for i in potential_matures:
-                        print(corr_ref_mature.id + ': ' + str(corr_ref_mature.seq).replace('U', 'T'))
-                        print(i.id + ': ' + i.seq + '\n')
-                    # mf.add_to_datafram(potential_matures, corr_ref_mature)
-    # mf.write_potential_matures(potential_matures_df)
+                    for potential_mature in potential_matures:
+                        mf.add_to_dataframe(potential_mature, corr_ref_mature)
+    mf.potential_matures_df.drop_duplicates(inplace=True)
+    print(mf.potential_matures_df)
+    mf.write_potential_matures()
