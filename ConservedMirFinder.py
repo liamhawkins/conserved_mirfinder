@@ -73,13 +73,13 @@ class MirFinder():
             stem_file = './tmp/stem-' + stem_entry.id + '.fasta'
 
         if blast_output_file is None:
-            blast_output_file = '/tmp/blast-stem-gen-' + stem_entry.id + '.xml'
+            blast_output_file = './tmp/blast-stem-gen-' + stem_entry.id + '.xml'
 
         SeqIO.write(stem_entry, stem_file, 'fasta')
         blastn_cline = NcbiblastnCommandline(cmd='blastn', query=stem_file,
                                              db=self.genome_database,
                                              out=blast_output_file,
-                                             outfmt=5, word_size=16)
+                                             outfmt=5, word_size=10)
 
         blastn_cline()
 
@@ -115,10 +115,10 @@ class MirFinder():
             mature_record_file = './tmp/mature-' + mature_record.id + '.fasta'
 
         if pot_stem_record_file is None:
-            pot_stem_record_file = '/tmp/pot-stem-' + potential_stem_record.id + '.fasta'
+            pot_stem_record_file = './tmp/pot-stem-' + potential_stem_record.id + '.fasta'
 
         if multi_blast_output_file is None:
-            multi_blast_output_file = '/tmp/multi-blast-' + \
+            multi_blast_output_file = './tmp/multi-blast-' + \
                                       mature_record.id + \
                                       '-' + potential_stem_record.id + '.xml'
 
@@ -129,7 +129,7 @@ class MirFinder():
                                             query=pot_stem_record_file,
                                             subject=mature_record_file,
                                             out=multi_blast_output_file,
-                                            outfmt=5, word_size=16)
+                                            outfmt=5, word_size=10)
 
         multi_blast()
         results_handle = open(multi_blast_output_file)
@@ -140,7 +140,7 @@ class MirFinder():
                     potential_mature_id = self.species_abreviation + \
                                           mature_record.id[3:]
 
-                    record = SeqRecord(Seq(hsp.sbjct.replace('-', '')),
+                    record = SeqRecord(Seq(hsp.query.replace('-', '')),
                                        id=potential_mature_id)
                     potential_matures.append(record)
         return potential_matures
@@ -166,7 +166,7 @@ if __name__ == '__main__':
                 for corr_ref_mature in corr_reference_matures:
                     potential_matures = mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem)
                     for i in potential_matures:
-                        print(i.id)
-                        print(i.seq)
+                        print(corr_ref_mature.id + ': ' + str(corr_ref_mature.seq).replace('U', 'T'))
+                        print(i.id + ': ' + i.seq + '\n')
                     # mf.add_to_datafram(potential_matures, corr_ref_mature)
     # mf.write_potential_matures(potential_matures_df)

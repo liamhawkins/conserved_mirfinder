@@ -7,7 +7,7 @@ from Bio import SeqIO
 QUERY_NAME = 'mmu-miR-15a'
 STEMLOOP_OUT_FILE = './output/stemloop-blast/stemloop-blast-' + QUERY_NAME + '.xml'
 STEMLOOP_QUERY_FILE = './queries/stemloop/' + QUERY_NAME + '.fasta'
-MATURE_QUERY_FILE = './queries/mature/' + QUERY_NAME + '.fasta'
+MATURE_QUERY_FILE = './queries/matures/' + QUERY_NAME + '.fasta'
 DB_FILES = './db/xen/xen'
 SPECIES_ABV = 'xen'
 E_VALUE_THRESH = 0.04
