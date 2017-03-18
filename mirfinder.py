@@ -22,8 +22,12 @@ def blast_mature_vs_potential_stemloops(query, subject, out):
     blastn_cline = NcbiblastnCommandline(cmd='blastn', out=out, outfmt=5, query=query, subject=subject, word_size=19)
     blastn_cline()
 
-blast_stemloops_vs_genome(STEMLOOP_QUERY_FILE, DB_FILES, STEMLOOP_OUT_FILE)
+def get_mature_sequences():
+    # TODO pass in reference stemloop fasta entry, return fasta entry(ies) for reference mature sequences
+    pass
 
+
+blast_stemloops_vs_genome(STEMLOOP_QUERY_FILE, DB_FILES, STEMLOOP_OUT_FILE)
 result_handle = open(STEMLOOP_OUT_FILE)
 blast_records = NCBIXML.parse(result_handle)
 
