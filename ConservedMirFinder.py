@@ -13,34 +13,45 @@ Sequence of events:
 
 """
 from Bio import SeqIO
+import config
 
 class MirFinder():
 
     def __init__(self):
-        pass
+        self.genome_database = config.genome_db
+        self.stem_file = config.stemloop_query_file
+        self.mature_file = config.mature_query_file
+        self.species_abreviation = config.species_abreviation
+        self.e_value_threshold = config.e_value_threshold
 
-    def read_reference_stems(self, stem_file):
+    def read_reference_stems(self, stem_file=None):
+        if stem_file is None:
+            stem_file = self.stem_file
+
         reference_stems = []
         for record in SeqIO.parse(stem_file, 'fasta'):
             reference_stems.append(record)
         return reference_stems
 
-    def read_reference_matures(self, mature_file):
+    def read_reference_matures(self, mature_file=None):
+        if mature_file is None:
+            mature_file = self.mature_file
+
         reference_matures = []
         for record in SeqIO.parse(mature_file, 'fasta'):
             reference_matures.append(record)
         return reference_matures
 
     def get_mir_name(self, fasta_entry):
-        # TODO: Pass in a fasta entry and return the name of the miRNA
         return fasta_entry.id
-        pass
 
     def get_corr_reference_matures(self, stem_entry, reference_matures):
         corr_reference_matures = []
         stem_name = self.get_mir_name(self, stem_entry)
+        mature_stem_names = [stem_name + '-3p', stem_name + '-5p']
         for ref_mature in reference_matures:
-            if stem_name == self.get_mir_name(self, ref_mature):
+            ref_mature_name = self.get_mir_name(self, ref_mature)
+            if ref_mature_name in mature_stem_names:
                 corr_reference_matures.append(ref_mature)
         return corr_reference_matures
 
