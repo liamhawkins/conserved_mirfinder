@@ -1,19 +1,3 @@
-"""
-Sequence of events:
-
-    Read config file
-    Read stems
-    Read matures
-    For each stem:
-        if has corresponding mature:
-            blast stem to genome
-            for each match:
-                blast mature to match
-                if results not in panda dataframe:
-                    add results to panda dataframe
-    write dataframe to file
-
-"""
 from Bio import SeqIO
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
@@ -35,6 +19,7 @@ class MirFinder():
         self.e_value_threshold = config.e_value_threshold
         self.columns = ['Reference_miR', 'Reference_seq', 'Potential_miR', 'Potential_seq']
         self.potential_matures_df = pd.DataFrame(columns=self.columns)
+        self.min_mature_length = 18
 
     def read_reference_stems(self, stem_file=None):
         if stem_file is None:
@@ -129,7 +114,7 @@ class MirFinder():
                                             query=pot_stem_record_file,
                                             subject=mature_record_file,
                                             out=multi_blast_output_file,
-                                            outfmt=5, word_size=16)
+                                            outfmt=5, word_size=7)
         multi_blast()
 
         results_handle = open(multi_blast_output_file)
@@ -175,7 +160,8 @@ if __name__ == '__main__':
                 for corr_ref_mature in corr_reference_matures:
                     potential_matures = mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem)
                     for potential_mature in potential_matures:
-                        mf.add_to_dataframe(potential_mature, corr_ref_mature)
+                        if len(str(potential_mature.seq)) >= mf.min_mature_length:
+                            mf.add_to_dataframe(potential_mature, corr_ref_mature)
 
     mf.potential_matures_df.drop_duplicates(inplace=True)
     mf.write_potential_matures()
