@@ -62,11 +62,6 @@ class MirFinder():
         return corr_reference_matures
 
     def blast_stem_vs_genome(self, stem_entry, genome_database=None, stem_file=None, blast_output_file=None):
-        '''
-        TODO: Write stem_entry to file, blast stem_entry_file against
-            genome_database, read in output_file to potential_stems list
-            and return potential_stems containing sequence records
-        '''
         potential_stems = []
 
         if genome_database is None:
@@ -76,10 +71,13 @@ class MirFinder():
             stem_file = './tmp/stem-' + stem_entry.id + '.fasta'
 
         if blast_output_file is None:
-            blast_output_file = '/tmp/blast-stem-genome-' + stem_entry.id + '.xml'
+            blast_output_file = '/tmp/blast-stem-gen-' + stem_entry.id + '.xml'
 
         SeqIO.write(stem_entry, stem_file, 'fasta')
-        blastn_cline = NcbiblastnCommandline(cmd='blastn',query=stem_file, db=self.genome_database, out=blast_output_file, outfmt=5, word_size=16)
+        blastn_cline = NcbiblastnCommandline(cmd='blastn', query=stem_file,
+                                             db=self.genome_database,
+                                             out=blast_output_file,
+                                             outfmt=5, word_size=16)
         blastn_cline()
 
         results_handle = open(blast_output_file)
@@ -90,8 +88,10 @@ class MirFinder():
                 for hsp in alignment.hsps:
                     if hsp.expect < self.e_value_threshold:
                         potential_stem_id = self.species_abreviation + \
-                                            stem_entry.id[3:] + '_potential_stem_' + \
-                                            alignment.hit_id + '_' + str(hsp.query_start) + \
+                                            stem_entry.id[3:] + \
+                                            '_potential_stem_' + \
+                                            alignment.hit_id + '_' + \
+                                            str(hsp.query_start) + \
                                             '_' + str(hsp.query_end)
                         record = SeqRecord(Seq(hsp.sbjct.replace('-', '')),
                                            id=potential_stem_id)
