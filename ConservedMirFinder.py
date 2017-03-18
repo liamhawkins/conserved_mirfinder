@@ -20,6 +20,7 @@ from Bio.Blast import NCBIXML
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import pandas as pd
+import sys
 import config
 
 
@@ -38,7 +39,6 @@ class MirFinder():
     def read_reference_stems(self, stem_file=None):
         if stem_file is None:
             stem_file = self.stem_file
-
         reference_stems = []
         for record in SeqIO.parse(stem_file, 'fasta'):
             reference_stems.append(record)
@@ -47,7 +47,6 @@ class MirFinder():
     def read_reference_matures(self, mature_file=None):
         if mature_file is None:
             mature_file = self.mature_file
-
         reference_matures = []
         for record in SeqIO.parse(mature_file, 'fasta'):
             reference_matures.append(record)
@@ -60,6 +59,7 @@ class MirFinder():
         corr_reference_matures = []
         stem_name = self.get_mir_name(stem_entry)
         mature_stem_names = [stem_name + '-3p', stem_name + '-5p']
+
         for ref_mature in reference_matures:
             ref_mature_name = self.get_mir_name(ref_mature)
             if ref_mature_name.lower() in mature_stem_names:
@@ -84,12 +84,10 @@ class MirFinder():
                                              db=self.genome_database,
                                              out=blast_output_file,
                                              outfmt=5, word_size=10)
-
         blastn_cline()
 
         results_handle = open(blast_output_file)
         blast_records = NCBIXML.parse(results_handle)
-
         for blast_record in blast_records:
             for alignment in blast_record.alignments:
                 for hsp in alignment.hsps:
@@ -100,10 +98,8 @@ class MirFinder():
                                             alignment.hit_id + '_' + \
                                             str(hsp.query_start) + \
                                             '_' + str(hsp.query_end)
-
                         record = SeqRecord(Seq(hsp.sbjct.replace('-', '')),
                                            id=potential_stem_id)
-
                         potential_stems.append(record)
 
         return potential_stems
@@ -134,8 +130,8 @@ class MirFinder():
                                             subject=mature_record_file,
                                             out=multi_blast_output_file,
                                             outfmt=5, word_size=16)
-
         multi_blast()
+
         results_handle = open(multi_blast_output_file)
         multi_blast_records = NCBIXML.parse(results_handle)
         for multi_blast_record in multi_blast_records:
@@ -143,10 +139,10 @@ class MirFinder():
                 for hsp in alignment.hsps:
                     potential_mature_id = self.species_abreviation + \
                                           mature_record.id[3:]
-
                     record = SeqRecord(Seq(hsp.query.replace('-', '')),
                                        id=potential_mature_id)
                     potential_matures.append(record)
+
         return potential_matures
 
     def add_to_dataframe(self, potential_mature, corr_ref_mature):
@@ -155,7 +151,6 @@ class MirFinder():
                              potential_mature.id,
                              str(potential_mature.seq).replace('T', 'U')]],
                              columns=self.columns)
-
         self.potential_matures_df = self.potential_matures_df.append(row, ignore_index=True)
 
     def write_potential_matures(self):
@@ -166,7 +161,13 @@ if __name__ == '__main__':
     mf = MirFinder()
     reference_stems = mf.read_reference_stems()
     reference_matures = mf.read_reference_matures()
+
+    i = 1
     for ref_stem in reference_stems:
+        sys.stdout.write('\rReference Stemloop: {}/{} - {}'.format(i, len(reference_stems), ref_stem.id))
+        sys.stdout.flush
+        i += 1
+
         corr_reference_matures = mf.get_corr_reference_matures(ref_stem, reference_matures)
         if len(corr_reference_matures) > 0:
             potential_stems = mf.blast_stem_vs_genome(ref_stem)
@@ -175,6 +176,6 @@ if __name__ == '__main__':
                     potential_matures = mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem)
                     for potential_mature in potential_matures:
                         mf.add_to_dataframe(potential_mature, corr_ref_mature)
+
     mf.potential_matures_df.drop_duplicates(inplace=True)
-    print(mf.potential_matures_df)
     mf.write_potential_matures()
