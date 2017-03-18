@@ -33,7 +33,7 @@ class MirFinder():
 
     def get_mir_name(self, fasta_entry):
         # TODO: Pass in a fasta entry and return the name of the miRNA
-        # return mir_name
+        return fasta_entry.id
         pass
 
     def get_corr_reference_matures(self, stem_entry, reference_matures):
