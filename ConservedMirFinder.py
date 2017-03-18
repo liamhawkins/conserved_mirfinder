@@ -12,7 +12,7 @@ Sequence of events:
                 add results to list
 
 """
-
+from Bio import SeqIO
 
 class MirFinder():
 
@@ -20,14 +20,16 @@ class MirFinder():
         pass
 
     def read_reference_stems(self, stem_file):
-        # TODO: Read stem file and store entries
-        # return reference_stems
-        pass
+        reference_stems = []
+        for record in SeqIO.parse(stem_file, 'fasta'):
+            reference_stems.append(record)
+        return reference_stems
 
     def read_reference_matures(self, mature_file):
-        # TODO: Read mature file and store entries
-        # return reference_matures
-        pass
+        reference_matures = []
+        for record in SeqIO.parse(mature_file, 'fasta'):
+            reference_matures.append(record)
+        return reference_matures
 
     def get_mir_name(self, fasta_entry):
         # TODO: Pass in a fasta entry and return the name of the miRNA
