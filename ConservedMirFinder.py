@@ -15,6 +15,10 @@ Sequence of events:
 
 """
 from Bio import SeqIO
+from Bio.Blast.Applications import NcbiblastnCommandline
+from Bio.Blast import NCBIXML
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 import config
 
 class MirFinder():
@@ -57,14 +61,43 @@ class MirFinder():
                 corr_reference_matures.append(ref_mature)
         return corr_reference_matures
 
-    def blast_stem_vs_genome(self, stem_entry, genome_database, output_file):
+    def blast_stem_vs_genome(self, stem_entry, genome_database=None, stem_file=None, blast_output_file=None):
         '''
         TODO: Write stem_entry to file, blast stem_entry_file against
             genome_database, read in output_file to potential_stems list
-            and return potential_stems containing fasta entries
+            and return potential_stems containing sequence records
         '''
-        # return potential_stems
-        pass
+        potential_stems = []
+
+        if genome_database is None:
+            genome_database = self.genome_database
+
+        if stem_file is None:
+            stem_file = './tmp/stem-' + stem_entry.id + '.fasta'
+
+        if blast_output_file is None:
+            blast_output_file = '/tmp/blast-stem-genome-' + stem_entry.id + '.xml'
+
+        SeqIO.write(stem_entry, stem_file, 'fasta')
+        blastn_cline = NcbiblastnCommandline(cmd='blastn',query=stem_file, db=self.genome_database, out=blast_output_file, outfmt=5, word_size=16)
+        blastn_cline()
+
+        results_handle = open(blast_output_file)
+        blast_records = NCBIXML.parse(results_handle)
+
+        for blast_record in blast_records:
+            for alignment in blast_record.alignments:
+                for hsp in alignment.hsps:
+                    if hsp.expect < self.e_value_threshold:
+                        potential_stem_id = self.species_abreviation + \
+                                            stem_entry.id[3:] + '_potential_stem_' + \
+                                            alignment.hit_id + '_' + str(hsp.query_start) + \
+                                            '_' + str(hsp.query_end)
+                        record = SeqRecord(Seq(hsp.sbjct.replace('-', '')),
+                                           id=potential_stem_id)
+                        potential_stems.append(record)
+
+        return potential_stems
 
     def blast_mature_vs_potential_stem(self, mature_entry, potential_stem, output_file):
         '''
