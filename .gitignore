@@ -1,8 +1,10 @@
 *.xml
 *.fasta
 *.swp
+*.pyc
 /db
 /output
 /queries
 /genomes
 /tmp
+test.py
