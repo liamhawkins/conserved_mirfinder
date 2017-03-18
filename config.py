@@ -1,4 +1,4 @@
-query_name = 'mmu-miR-15a'
+query_name = 'mmu-let'
 stemloop_query_file = './queries/stemloop/' + query_name + '.fasta'
 stemloop_output_file = './output/stemloop-blast/stemloop-blast-' + query_name + '.xml'
 mature_query_file = './queries/matures/' + query_name + '.fasta'
