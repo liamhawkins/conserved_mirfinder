@@ -9,7 +9,9 @@ Sequence of events:
             blast stem to genome
             for each match:
                 blast mature to match
-                add results to list
+                if results not in panda dataframe:
+                    add results to panda dataframe
+    write dataframe to file
 
 """
 from Bio import SeqIO
@@ -56,17 +58,29 @@ class MirFinder():
         return corr_reference_matures
 
     def blast_stem_vs_genome(self, stem_entry, genome_database, output_file):
-        # TODO: Blast stem entry against genome and return potential_stems
+        '''
+        TODO: Write stem_entry to file, blast stem_entry_file against
+            genome_database, read in output_file to potential_stems list
+            and return potential_stems containing fasta entries
+        '''
         # return potential_stems
         pass
 
     def blast_mature_vs_potential_stem(self, mature_entry, potential_stem, output_file):
-        # TODO: Blast mature entry against potential_stems and return potential_matures
+        '''
+        TODO: Write mature_entry and potential_stem to file, blast
+            mature_entry against potential_stem, read in output_file
+            to potential_matures list and return potential_matures
+        '''
         # return potential_matures 
         pass
 
-    def write_potential_matures(self, potential_matures, corr_ref_mature):
-        # TODO: write potential matures with corresponding reference mature to file
+    def add_to_dataframe(self, potential_matures, corr_ref_mature):
+        # TODO: Check if potential_mature is already in df, if not add to df
+        pass
+
+    def write_potential_matures(self, potential_matures_df):
+        # TODO: write potential_matures_df to file
         pass
 
 
@@ -81,4 +95,5 @@ if __name__ == '__main__':
             for pot_stem in potential_stems:
                 for corr_ref_mature in corr_reference_matures:
                     potential_matures = mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem, output_file)
-                    mf.write_potential_matures(potential_matures, corr_ref_mature)
+                    mf.add_to_datafram(potential_matures, corr_ref_mature)
+    mf.write_potential_matures(potential_matures_df)
