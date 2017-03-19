@@ -55,7 +55,7 @@ class MirFinder():
 
     def blast_stem_vs_genome(self, stem_entry, genome_database=None,
                              stem_file=None, blast_output_file=None):
-        potential_stems = []
+        self.potential_stems = []
 
         if genome_database is None:
             genome_database = self.genome_database
@@ -87,16 +87,14 @@ class MirFinder():
                                             '_' + str(hsp.query_end)
                         record = SeqRecord(Seq(hsp.sbjct.replace('-', '')),
                                            id=potential_stem_id)
-                        potential_stems.append(record)
-
-        return potential_stems
+                        self.potential_stems.append(record)
 
     def blast_mature_vs_potential_stem(self, mature_record,
                                        potential_stem_record,
                                        mature_record_file=None,
                                        pot_stem_record_file=None,
                                        multi_blast_output_file=None):
-        potential_matures = []
+        self.potential_matures = []
 
         if mature_record_file is None:
             mature_record_file = './tmp/mature-' + mature_record.id + '.fasta'
@@ -128,9 +126,7 @@ class MirFinder():
                                           mature_record.id[3:]
                     record = SeqRecord(Seq(hsp.query.replace('-', '')),
                                        id=potential_mature_id)
-                    potential_matures.append(record)
-
-        return potential_matures
+                    self.potential_matures.append(record)
 
     def add_to_dataframe(self, potential_mature, corr_ref_mature):
         row = pd.DataFrame([[corr_ref_mature.id,
@@ -158,11 +154,11 @@ if __name__ == '__main__':
 
         mf.get_corr_reference_matures(ref_stem)
         if len(mf.corr_reference_matures) > 0:
-            potential_stems = mf.blast_stem_vs_genome(ref_stem)
-            for pot_stem in potential_stems:
+            mf.blast_stem_vs_genome(ref_stem)
+            for pot_stem in mf.potential_stems:
                 for corr_ref_mature in mf.corr_reference_matures:
-                    potential_matures = mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem)
-                    for potential_mature in potential_matures:
+                    mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem)
+                    for potential_mature in mf.potential_matures:
                         if len(str(potential_mature.seq)) >= mf.min_mature_length:
                             mf.add_to_dataframe(potential_mature, corr_ref_mature)
 
