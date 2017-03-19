@@ -1,4 +1,4 @@
-query_name = 'mmu-let'
+query_name = 'all_mmu_mir'
 stemloop_query_file = './queries/stemloop/' + query_name + '.fasta'
 mature_query_file = './queries/matures/' + query_name + '.fasta'
 csv_filename = './output/' + query_name + '_potential_sequences.csv'

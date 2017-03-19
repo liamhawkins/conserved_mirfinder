@@ -1,3 +1,8 @@
+'''
+TODO:
+    -Make more object oriented
+    -instead of writing out sequences individual, blast all at once then parse blast record
+'''
 from Bio import SeqIO
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
@@ -19,7 +24,7 @@ class MirFinder():
         self.e_value_threshold = config.e_value_threshold
         self.columns = ['Reference_miR', 'Reference_seq', 'Potential_miR', 'Potential_seq']
         self.potential_matures_df = pd.DataFrame(columns=self.columns)
-        self.min_mature_length = 18
+        self.min_mature_length = 21
 
     def read_reference_stems(self, stem_file=None):
         if stem_file is None:
