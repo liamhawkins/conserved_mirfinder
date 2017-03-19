@@ -145,6 +145,7 @@ class MirFinder():
 
     def write_potential_matures(self):
         self.potential_matures_df.to_csv(self.csv_filename, sep=',', index=False)
+        print('\nPotential conserved mature miRNA sequences written to {}'.format(self.csv_filename))
 
 
 if __name__ == '__main__':
