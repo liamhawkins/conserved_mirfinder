@@ -29,32 +29,29 @@ class MirFinder():
     def read_reference_stems(self, stem_file=None):
         if stem_file is None:
             stem_file = self.stem_file
-        reference_stems = []
+        self.reference_stems = []
         for record in SeqIO.parse(stem_file, 'fasta'):
-            reference_stems.append(record)
-        return reference_stems
+            self.reference_stems.append(record)
 
     def read_reference_matures(self, mature_file=None):
         if mature_file is None:
             mature_file = self.mature_file
-        reference_matures = []
+        self.reference_matures = []
         for record in SeqIO.parse(mature_file, 'fasta'):
-            reference_matures.append(record)
-        return reference_matures
+            self.reference_matures.append(record)
 
     def get_mir_name(self, fasta_entry):
         return fasta_entry.id
 
-    def get_corr_reference_matures(self, stem_entry, reference_matures):
-        corr_reference_matures = []
+    def get_corr_reference_matures(self, stem_entry):
+        self.corr_reference_matures = []
         stem_name = self.get_mir_name(stem_entry)
         mature_stem_names = [stem_name + '-3p', stem_name + '-5p']
 
-        for ref_mature in reference_matures:
+        for ref_mature in self.reference_matures:
             ref_mature_name = self.get_mir_name(ref_mature)
             if ref_mature_name.lower() in mature_stem_names:
-                corr_reference_matures.append(ref_mature)
-        return corr_reference_matures
+                self.corr_reference_matures.append(ref_mature)
 
     def blast_stem_vs_genome(self, stem_entry, genome_database=None,
                              stem_file=None, blast_output_file=None):
@@ -150,20 +147,20 @@ class MirFinder():
 
 if __name__ == '__main__':
     mf = MirFinder()
-    reference_stems = mf.read_reference_stems()
-    reference_matures = mf.read_reference_matures()
+    mf.read_reference_stems()
+    mf.read_reference_matures()
 
     i = 1
-    for ref_stem in reference_stems:
-        sys.stdout.write('\rReference Stemloop: {}/{} - {}'.format(i, len(reference_stems), ref_stem.id))
+    for ref_stem in mf.reference_stems:
+        sys.stdout.write('\rReference Stemloop: {}/{} - {}'.format(i, len(mf.reference_stems), ref_stem.id))
         sys.stdout.flush
         i += 1
 
-        corr_reference_matures = mf.get_corr_reference_matures(ref_stem, reference_matures)
-        if len(corr_reference_matures) > 0:
+        mf.get_corr_reference_matures(ref_stem)
+        if len(mf.corr_reference_matures) > 0:
             potential_stems = mf.blast_stem_vs_genome(ref_stem)
             for pot_stem in potential_stems:
-                for corr_ref_mature in corr_reference_matures:
+                for corr_ref_mature in mf.corr_reference_matures:
                     potential_matures = mf.blast_mature_vs_potential_stem(corr_ref_mature, pot_stem)
                     for potential_mature in potential_matures:
                         if len(str(potential_mature.seq)) >= mf.min_mature_length:
