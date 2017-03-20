@@ -7,4 +7,5 @@
 /queries
 /genomes
 /tmp
+/__pycache__
 test.py
